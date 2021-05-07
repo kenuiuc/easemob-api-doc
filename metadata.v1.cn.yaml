@@ -1,0 +1,534 @@
+openapi: 3.0.0
+info:
+  title: 用户属性
+  version: '1.0'
+servers:
+  - url: "http://a1.easemob.com"
+  - url: "http://a31.easemob.com"
+  - url: "http://a1-vip6.easemob.com"
+  - url: "http://a1-sgp.easemob.com"
+
+paths:
+
+  '/{orgName}/{appName}/metadata/user/get':
+
+    parameters:
+      - schema:
+          type: string
+        name: orgName
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: appName
+        in: path
+        required: true
+
+    post:
+      parameters:
+        - schema:
+            type: string
+          name: Content-Type
+          description: application/json
+          in: header
+          required: true
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: 不需要权限认证。向互联网公开。
+          required: false
+      operationId: batchGetUserMetadata
+      summary: 批量获取用户属性
+      description: >
+        根据指定的用户名列表和属性列表，查询用户属性。
+        如果指定的用户/属性不存在，则返回空数据{}。
+        每次最多指定100个用户。
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/batchGetMetadataRequest'
+      responses:
+
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/batchGetMetadataResponse'
+
+        403:
+          description: >
+            指定的用户名数量超过100
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/batchSizeForbiddenResponse'
+
+        500:
+          description: >
+            一般是mysql错误。
+            如果问题持续存在，请联系我们的技术支持团队。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  '/{orgName}/{appName}/metadata/user/{userName}':
+
+    parameters:
+      - schema:
+          type: string
+        name: orgName
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: appName
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: userName
+        in: path
+        required: true
+
+    get:
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: 没有权限认证。开放给互联网。
+          required: false
+      operationId: getUserMetadata
+      summary: 获取用户属性
+      description: >
+        获取指定用户的所有用户属性键值对。
+        如果指定用户不存在，或指定用户的属性不存在，则返回空数据{}。
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getMetadataResponse'
+        500:
+          description: >
+            一般是mysql错误。
+            如果问题持续存在，请联系我们的技术支持团队。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+    put:
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Content-Type
+          description: application/x-www-form-urlencoded
+          required: true
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: >
+            用户级别的 Bearer token. 
+            对于某个用户的属性，只有该用户或app管理员有权做修改。
+          required: true
+      operationId: putUserMetadata
+      summary: 设置用户属性
+      description: >
+        对指定的用户设置用户属性。
+        只有该用户本人或app管理员有权限做设置。
+        用户属性的内容为一个或多个纯文本键值对。
+        默认单一用户的属性总长不得超过2KB. 
+        默认一个app下所有用户的所有属性总长不得超过10GB.
+
+      requestBody:
+        required: true
+        description: key-value pairs
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: true
+            example:
+              key_1: value_1
+              key_2: value_2
+              title: developer
+              employer: easemob
+
+      responses:
+
+        200:
+          description: >
+            返回设置成功后该用户的所有属性。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getMetadataResponse'
+
+        401:
+          description: >
+            只有用户本人或app管理员有权修改他的属性。
+            普通用户尝试修改一个不存在用户的属性时，也会返回401，
+            因为普通用户无权知道某个用户名是否存在。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/unauthorizedResponse'
+
+        403:
+          description: >
+            您尝试设置的用户属性值超过长度限制。
+            该限制可能是对一个用户下的属性总长限制，
+            也可能是对一个app下所有用户属性的总长限制。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/dataSizeForbiddenResponse'
+
+        404:
+          description: >
+            您要为之设置属性的用户不存在。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/notFoundResponse'
+
+        409:
+          description: >
+            您尝试修改的用户已经被“别人”修改了。
+            由于我们对用户属性使用乐观锁处理并发修改问题，
+            当多个线程同时对同一用户做属性修改时，
+            只有其中一个线程会修改成功并返回200，
+            其他线程都会修改失败并返回409。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/conflictResponse'
+
+        500:
+          description: >
+            一般是mysql错误。
+            如果问题持续存在，请联系我们的技术支持团队。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
+    delete:
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: >
+            用户级别的 Bearer token.
+            只有用户本人或app管理员有权删除他的用户属性。
+          required: true
+      operationId: deleteUserMetadata
+      summary: 删除用户属性
+      description: >
+        删除指定用户的所有用户属性。
+        如果指定的用户不存在，或其用户属性不存在（也许已经被删除了），也视作删除成功。
+      responses:
+        200:
+          description: >
+            删除成功。注意删除不存在用户也视作成功。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/booleanResponse'
+        401:
+          description: >
+            只有用户本人或app管理员有权删除他的用户属性。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/unauthorizedResponse'
+        500:
+          description: >
+            一般是mysql错误。
+            如果问题持续存在，请联系我们的技术支持团队。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  '/{orgName}/{appName}/metadata/user/capacity':
+    parameters:
+      - schema:
+          type: string
+        in: header
+        name: Authorization
+        description: App管理员 Bearer token
+        required: true
+      - schema:
+          type: string
+        name: orgName
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: appName
+        in: path
+        required: true
+    get:
+      operationId: getAppUserMetadataSize
+      summary: 获取总大小
+      description: 获取该app下所有用户的用户属性总大小，单位Bytes
+      responses:
+
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getCapacityResponse'
+
+        401:
+          description: 只有app管理员有权限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/unauthorizedResponse'
+
+        500:
+          description: >
+            一般是mysql错误。
+            如果问题持续存在，请联系我们的技术支持团队。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+components:
+  schemas:
+
+    unauthorizedResponse:
+      type: object
+      properties:
+        timestamp:
+          type: long
+          example: 1616573382270
+          description: epoch timestamp
+        duration:
+          type: long
+          example: 10
+          description: response time in milliseconds
+        desc:
+          type: string
+          description: unauthorized
+          example: "unauthorized"
+      required:
+        - timestamp
+        - duration
+        - desc
+
+    batchSizeForbiddenResponse:
+      type: object
+      properties:
+        timestamp:
+          type: long
+          example: 1616573382270
+          description: epoch timestamp
+        duration:
+          type: long
+          example: 10
+          description: response time in milliseconds
+        desc:
+          type: string
+          description: error message
+          example: "exceed allowed batch size 100"
+      required:
+        - timestamp
+        - duration
+        - desc
+
+    dataSizeForbiddenResponse:
+      type: object
+      properties:
+        timestamp:
+          type: long
+          example: 1616573382270
+          description: epoch timestamp
+        duration:
+          type: long
+          example: 10
+          description: response time in milliseconds
+        desc:
+          type: string
+          description: error message
+          example: "user metadata length exceed the limit"
+      required:
+        - timestamp
+        - duration
+        - desc
+
+    notFoundResponse:
+      type: object
+      properties:
+        timestamp:
+          type: long
+          example: 1616573382270
+          description: epoch timestamp
+        duration:
+          type: long
+          example: 10
+          description: response time in milliseconds
+        desc:
+          type: string
+          description: Not Found
+          example: "Not Found"
+      required:
+        - timestamp
+        - duration
+        - desc
+
+    conflictResponse:
+      type: object
+      properties:
+        timestamp:
+          type: long
+          example: 1616573382270
+          description: epoch timestamp
+        duration:
+          type: long
+          example: 10
+          description: response time in milliseconds
+        desc:
+          type: string
+          description: error message
+          example: "update userMetadata failed, concurrent updates not allowed"
+      required:
+        - timestamp
+        - duration
+        - desc
+
+    errorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: long
+          example: 1616573382270
+          description: epoch timestamp
+        duration:
+          type: long
+          example: 10
+          description: response time in milliseconds
+        desc:
+          type: string
+          description: error message
+          example: "org.hibernate.exception.JDBCConnectionException: Unable to acquire JDBC Connection"
+      required:
+        - timestamp
+        - duration
+        - desc
+
+    getMetadataResponse:
+      type: object
+      properties:
+        timestamp:
+          type: long
+          example: 1616573382270
+          description: epoch timestamp
+        duration:
+          type: long
+          example: 10
+          description: response time in milliseconds
+        data:
+          type: map
+          description: metadata key-value pairs
+          example: {"key_1": "value_1", "key_2": "value_2", "title":"developer", "employer": "easemob"}
+      required:
+        - data
+        - duration
+        - timestamp
+
+    batchGetMetadataRequest:
+      description: request body for batch getting metadata of multiple users
+      type: object
+      properties:
+        targets:
+          description: 用户名列表，最多100个用户名。
+          type: array
+          items:
+            type: string
+          example:
+            - "user_1"
+            - "user_2"
+            - "user_3"
+        properties:
+          description: 属性名列表，查询结果只返回该列表中包含的属性，不在该列表中的属性将被忽略。
+          type: array
+          items:
+            type: string
+          example:
+            - "property_1"
+            - "property_2"
+            - "property_3"
+
+    batchGetMetadataResponse:
+      type: object
+      properties:
+        timestamp:
+          type: long
+          description: epoch timestamp
+          example: 1616573382270
+        duration:
+          type: long
+          description: response time in milliseconds
+          example: 10
+        data:
+          type: object
+          description: username-properties key-value pairs
+          example: {"user_1": {"property_1": "value_1", "property_2": "value_2"}, "user_2": {"property_3": "value_3"}, "user_3":{}}
+      required:
+        - data
+        - duration
+        - timestamp
+
+    getCapacityResponse:
+      type: object
+      properties:
+        timestamp:
+          type: long
+          description: epoch timestamp
+          example: 1616573382270
+        duration:
+          type: long
+          description: response time in milliseconds
+          example: 10
+        data:
+          type: long
+          description: current total size in Bytes
+          example: 1024
+      required:
+        - data
+        - duration
+        - timestamp
+
+    booleanResponse:
+      type: object
+      properties:
+        timestamp:
+          type: long
+          description: epoch timestamp
+          example: 1616573382270
+        duration:
+          type: long
+          description: response time in milliseconds
+          example: 10
+        data:
+          type: boolean
+          example: true
+      required:
+        - data
+        - duration
+        - timestamp

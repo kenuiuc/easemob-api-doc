@@ -1,0 +1,25 @@
+nickname
+avatarurl
+mail
+phone
+gender
+birth
+sign
+ext
+
+
+- in: formData
+  type: string
+  name: nickname
+  required: false
+
+- in: formData
+  type: string
+  name: nickname
+  required: false
+
+- in: formData
+  type: string
+  name: nickname
+  required: false
+

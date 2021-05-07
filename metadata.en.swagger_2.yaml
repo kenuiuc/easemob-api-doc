@@ -1,0 +1,512 @@
+swagger: '2.0'
+info:
+  title: userMetadata
+  version: '1.0'
+host: a1.easemob.com
+basePath: /
+schemes:
+  - http
+paths:
+  '/{orgName}/{appName}/metadata/user/capacity':
+    parameters:
+      - description: App admin's Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - in: path
+        name: orgName
+        required: true
+        type: string
+      - in: path
+        name: appName
+        required: true
+        type: string
+    get:
+      produces:
+        - application/json
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/getCapacityResponse'
+        '401':
+          description: Only the app admin is allowed to access
+          schema:
+            $ref: '#/definitions/unauthorizedResponse'
+        '500':
+          description: >
+            Typically mysql error. Please address the issue to our support team
+            if the problem persists.
+          schema:
+            $ref: '#/definitions/errorResponse'
+      description: get the current total size (in Bytes) of user metadata for this app
+      operationId: getAppUserMetadataSize
+      summary: get size
+  '/{orgName}/{appName}/metadata/user/get':
+    parameters:
+      - in: path
+        name: orgName
+        required: true
+        type: string
+      - in: path
+        name: appName
+        required: true
+        type: string
+    post:
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - description: application/json
+          in: header
+          name: Content-Type
+          required: true
+          type: string
+        - description: No authorization needed. Open to the public.
+          in: header
+          name: Authorization
+          required: false
+          type: string
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/batchGetMetadataRequest'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/batchGetMetadataResponse'
+        '403':
+          description: |
+            Number of user names you are querying exceeds the batch limit, 100.
+          schema:
+            $ref: '#/definitions/batchSizeForbiddenResponse'
+        '500':
+          description: >
+            Typically mysql error. Please address the issue to our support team
+            if the problem persists.
+          schema:
+            $ref: '#/definitions/errorResponse'
+      description: >
+        Get metadata key-value pairs for given users and properties. Will return
+        empty data if the users/properties doesn't exist You can batch get for
+        100 users at most.
+      operationId: batchGetUserMetadata
+      summary: batch get metadata
+  '/{orgName}/{appName}/metadata/user/{userName}':
+    parameters:
+      - in: path
+        name: orgName
+        required: true
+        type: string
+      - in: path
+        name: appName
+        required: true
+        type: string
+      - in: path
+        name: userName
+        required: true
+        type: string
+    delete:
+      produces:
+        - application/json
+      parameters:
+        - description: >
+            User level Bearer token. Only the same user or the app admin is
+            authorized to delete metadata for the designated user.
+          in: header
+          name: Authorization
+          required: true
+          type: string
+      responses:
+        '200':
+          description: >
+            Success. Note that deleting metadata for a non-existing user will
+            also succeed.
+          schema:
+            $ref: '#/definitions/booleanResponse'
+        '401':
+          description: >
+            Only the same user or the app admin is authorized to delete metadata
+            for the designated user.
+          schema:
+            $ref: '#/definitions/unauthorizedResponse'
+        '500':
+          description: >
+            Typically mysql error. Please address the issue to our support team
+            if the problem persists.
+          schema:
+            $ref: '#/definitions/errorResponse'
+      description: >-
+        Delete metadata for the designated user. Deleting non-existing user is
+        defined as success.
+      operationId: deleteUserMetadata
+      summary: delete metadata
+    get:
+      produces:
+        - application/json
+      parameters:
+        - description: No authorization needed. Open to the public.
+          in: header
+          name: Authorization
+          required: false
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/getMetadataResponse'
+        '500':
+          description: >
+            Typically mysql error. Please address the issue to our support team
+            if the problem persists.
+          schema:
+            $ref: '#/definitions/errorResponse'
+      description: >
+        Get all metadata key-value pairs for a single user. Will returns empty
+        data if the user doesn't exist.
+      operationId: getUserMetadata
+      summary: get metadata
+    put:
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - description: application/x-www-form-urlencoded
+          in: header
+          name: Content-Type
+          required: true
+          type: string
+        - description: >
+            User level Bearer token. Only the same user or the app admin is
+            authorized to set metadata for the designated user.
+          in: header
+          name: Authorization
+          required: true
+          type: string
+          
+        
+        - in: formData
+          type: string
+          name: nickname
+          required: false
+        
+        - in: formData
+          type: string
+          name: avatarurl
+          required: false
+        
+        - in: formData
+          type: string
+          name: mail
+          required: false
+        
+        - in: formData
+          type: string
+          name: phone
+          required: false
+        
+        - in: formData
+          type: string
+          name: gender
+          required: false
+        
+        - in: formData
+          type: string
+          name: birth
+          required: false
+        
+        - in: formData
+          type: string
+          name: sign
+          required: false
+        
+        - in: formData
+          type: string
+          name: ext
+          required: false
+
+  
+          
+      responses:
+        '200':
+          description: >
+            Return the full content of this user's metadata after the successful
+            modification.
+          schema:
+            $ref: '#/definitions/getMetadataResponse'
+        '401':
+          description: >
+            Only the user himself or the app admin are allowed to modify
+            metadata of the designated user. Also return 401 when a non-admin
+            user is trying to PUT to a non-existing user because regular users
+            are not authorized to know if a specific user exist or not.
+          schema:
+            $ref: '#/definitions/unauthorizedResponse'
+        '403':
+          description: >
+            Happens when you are trying to put data that exceeds the limit,
+            either the user level limit (2KB in default) or the app level limit
+            (10GB in default).
+          schema:
+            $ref: '#/definitions/dataSizeForbiddenResponse'
+        '404':
+          description: |
+            The user you are trying to set metadata for doesn't exist.
+          schema:
+            $ref: '#/definitions/notFoundResponse'
+        '409':
+          description: >
+            The user you are trying to change is already changed. We are using
+            optimistic locking so when multiple threads are trying to change the
+            same user at the same time only one of them will succeed and others
+            will fail and get 409 conflict response.
+          schema:
+            $ref: '#/definitions/conflictResponse'
+        '500':
+          description: >
+            Typically mysql error. Please address the issue to our support team
+            if the problem persists.
+          schema:
+            $ref: '#/definitions/errorResponse'
+      description: >
+        Set metadata for the designated user. Only the user himself or the app
+        admin is authorized to change metadata for an user. Content of metadata
+        is plain string key-value pairs. The default limit of metadata size for
+        a single user is 2KB. The default limit of total metadata size of all
+        users in an app is 10GB. 
+        Note that the key names listed here are just examples. You can set any plain text key-value pairs.
+      operationId: putUserMetadata
+      summary: put metadata
+definitions:
+  batchGetMetadataRequest:
+    description: request body for batch getting metadata of multiple users
+    properties:
+      properties:
+        description: >
+          Properties filter list. The query only returns those properties within
+          this list. Those that are not included in the list will be ignored.
+        example:
+          - property_1
+          - property_2
+          - property_3
+        items:
+          type: string
+        type: array
+      targets:
+        description: 'user names, 100 users at most'
+        example:
+          - user_1
+          - user_2
+          - user_3
+        items:
+          type: string
+        type: array
+    type: object
+  batchGetMetadataResponse:
+    properties:
+      data:
+        description: username-properties key-value pairs
+        example:
+          user_1:
+            property_1: value_1
+            property_2: value_2
+          user_2:
+            property_3: value_3
+          user_3: {}
+        type: object
+      duration:
+        description: response time in milliseconds
+        example: 10
+        type: number
+      timestamp:
+        description: epoch timestamp
+        example: 1616573382270
+        type: number
+    required:
+      - data
+      - duration
+      - timestamp
+    type: object
+  batchSizeForbiddenResponse:
+    properties:
+      desc:
+        description: error message
+        example: exceed allowed batch size 100
+        type: string
+      duration:
+        description: response time in milliseconds
+        example: 10
+        type: number
+      timestamp:
+        description: epoch timestamp
+        example: 1616573382270
+        type: number
+    required:
+      - timestamp
+      - duration
+      - desc
+    type: object
+  booleanResponse:
+    properties:
+      data:
+        example: true
+        type: boolean
+      duration:
+        description: response time in milliseconds
+        example: 10
+        type: number
+      timestamp:
+        description: epoch timestamp
+        example: 1616573382270
+        type: number
+    required:
+      - data
+      - duration
+      - timestamp
+    type: object
+  conflictResponse:
+    properties:
+      desc:
+        description: error message
+        example: 'update userMetadata failed, concurrent updates not allowed'
+        type: string
+      duration:
+        description: response time in milliseconds
+        example: 10
+        type: number
+      timestamp:
+        description: epoch timestamp
+        example: 1616573382270
+        type: number
+    required:
+      - timestamp
+      - duration
+      - desc
+    type: object
+  dataSizeForbiddenResponse:
+    properties:
+      desc:
+        description: error message
+        example: user metadata length exceed the limit
+        type: string
+      duration:
+        description: response time in milliseconds
+        example: 10
+        type: number
+      timestamp:
+        description: epoch timestamp
+        example: 1616573382270
+        type: number
+    required:
+      - timestamp
+      - duration
+      - desc
+    type: object
+  errorResponse:
+    properties:
+      desc:
+        description: error message
+        example: >-
+          org.hibernate.exception.JDBCConnectionException: Unable to acquire
+          JDBC Connection
+        type: string
+      duration:
+        description: response time in milliseconds
+        example: 10
+        type: number
+      timestamp:
+        description: epoch timestamp
+        example: 1616573382270
+        type: number
+    required:
+      - timestamp
+      - duration
+      - desc
+    type: object
+  getCapacityResponse:
+    properties:
+      data:
+        description: current total size in Bytes
+        example: 1024
+        type: number
+      duration:
+        description: response time in milliseconds
+        example: 10
+        type: number
+      timestamp:
+        description: epoch timestamp
+        example: 1616573382270
+        type: number
+    required:
+      - data
+      - duration
+      - timestamp
+    type: object
+  getMetadataResponse:
+    properties:
+      data:
+        description: metadata key-value pairs
+        example:
+          employer: easemob
+          key_1: value_1
+          key_2: value_2
+          title: developer
+        type: object
+      duration:
+        description: response time in milliseconds
+        example: 10
+        type: number
+      timestamp:
+        description: epoch timestamp
+        example: 1616573382270
+        type: number
+    required:
+      - data
+      - duration
+      - timestamp
+    type: object
+  notFoundResponse:
+    properties:
+      desc:
+        description: Not Found
+        example: Not Found
+        type: string
+      duration:
+        description: response time in milliseconds
+        example: 10
+        type: number
+      timestamp:
+        description: epoch timestamp
+        example: 1616573382270
+        type: number
+    required:
+      - timestamp
+      - duration
+      - desc
+    type: object
+  unauthorizedResponse:
+    properties:
+      desc:
+        description: unauthorized
+        example: unauthorized
+        type: string
+      duration:
+        description: response time in milliseconds
+        example: 10
+        type: number
+      timestamp:
+        description: epoch timestamp
+        example: 1616573382270
+        type: number
+    required:
+      - timestamp
+      - duration
+      - desc
+    type: object
+    
+x-components: {}

@@ -1,0 +1,40 @@
+- in: formData
+  type: string
+  name: nickname
+  required: false
+
+- in: formData
+  type: string
+  name: avatarurl
+  required: false
+
+- in: formData
+  type: string
+  name: mail
+  required: false
+
+- in: formData
+  type: string
+  name: phone
+  required: false
+
+- in: formData
+  type: string
+  name: gender
+  required: false
+
+- in: formData
+  type: string
+  name: birth
+  required: false
+
+- in: formData
+  type: string
+  name: sign
+  required: false
+
+- in: formData
+  type: string
+  name: ext
+  required: false
+

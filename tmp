@@ -1,0 +1,10 @@
+nickname: '昵称',
+    avatarurl: 'http://avatarurl',
+    mail: '123@qq.com',
+    phone: '16888888888',
+    gender: 'female',
+    birth: '2000-01-01',
+    sign: 'a sign',
+    ext: {
+        nationality: 'China'
+    }

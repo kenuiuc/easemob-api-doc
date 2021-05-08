@@ -44,7 +44,7 @@
             "sortWeight":6
         },
         {
-            "name":"UserMetadata",
+            "name":"User Metadata",
             "description":"",
             "sortWeight":7
         }
@@ -3852,7 +3852,7 @@
             ],
             "get":{
                 "tags":[
-                    "UserMetadata"
+                    "User Metadata"
                 ],
                 "produces":[
                     "application/json"
@@ -3902,7 +3902,7 @@
             ],
             "post":{
                 "tags":[
-                    "UserMetadata"
+                    "User Metadata"
                 ],
                 "consumes":[
                     "application/json"
@@ -3981,7 +3981,7 @@
             ],
             "delete":{
                 "tags":[
-                    "UserMetadata"
+                    "User Metadata"
                 ],
                 "produces":[
                     "application/json"
@@ -4021,7 +4021,7 @@
             },
             "get":{
                 "tags":[
-                    "UserMetadata"
+                    "User Metadata"
                 ],
                 "produces":[
                     "application/json"
@@ -4055,7 +4055,7 @@
             },
             "put":{
                 "tags":[
-                    "UserMetadata"
+                    "User Metadata"
                 ],
                 "consumes":[
                     "application/x-www-form-urlencoded"

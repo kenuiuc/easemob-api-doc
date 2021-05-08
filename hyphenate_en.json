@@ -3823,7 +3823,6 @@
             }
         },
         "/{orgName}/{appName}/metadata/user/capacity": {
-            "tags": ["UserMetadata"],
             "parameters": [
                 {
                     "description": "App admin's Bearer token",
@@ -3846,6 +3845,7 @@
                 }
             ],
             "get": {
+                "tags": ["UserMetadata"],
                 "produces": [
                     "application/json"
                 ],
@@ -3876,7 +3876,6 @@
             }
         },
         "/{orgName}/{appName}/metadata/user/get": {
-            "tags": ["UserMetadata"],
             "parameters": [
                 {
                     "in": "path",
@@ -3892,6 +3891,7 @@
                 }
             ],
             "post": {
+                "tags": ["UserMetadata"],
                 "consumes": [
                     "application/json"
                 ],
@@ -3947,7 +3947,6 @@
             }
         },
         "/{orgName}/{appName}/metadata/user/{userName}": {
-            "tags": ["UserMetadata"],
             "parameters": [
                 {
                     "in": "path",
@@ -3969,6 +3968,7 @@
                 }
             ],
             "delete": {
+                "tags": ["UserMetadata"],
                 "produces": [
                     "application/json"
                 ],
@@ -4006,6 +4006,7 @@
                 "summary": "delete metadata"
             },
             "get": {
+                "tags": ["UserMetadata"],
                 "produces": [
                     "application/json"
                 ],
@@ -4037,6 +4038,7 @@
                 "summary": "get metadata"
             },
             "put": {
+                "tags": ["UserMetadata"],
                 "consumes": [
                     "application/x-www-form-urlencoded"
                 ],
